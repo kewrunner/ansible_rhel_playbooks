@@ -1,0 +1,63 @@
+---
+- hosts: all
+
+  tasks:
+  - name: install the latest version of net-snmp
+    yum:
+      name: net-snmp
+      state: latest
+
+  - name: install the latest version of net-snmp-utils 
+    yum:
+      name: net-snmp-utils
+      state: latest
+
+  - name: "Stop snmpd service"
+    service:
+      name: snmpd
+      state: stopped
+
+  - name: "Create net-snsmp user SNMPV3USER"
+    command: net-snmp-create-v3-user -ro -A snmpv3authPass -a SHA -X snmpv3encPass -x AES snmpv3user
+
+  - name: "Ensure directory /root/.snmp"
+    file:
+      path: /root/.snmp  
+      state: directory
+
+  - name: "Copy snmpdv2v3-linux file to /etc/snmp"
+    copy:
+      src: /usr/local/bin/ansible/roles/snmp_files/snmpdv2v3-linux
+      dest: /etc/snmp/snmpd.conf 
+      owner: root
+      group: root
+      mode: 0644
+#    notify:
+#    - snmp_start
+
+  - name: "Copy snmp.conf file to /root/.snmp"
+    copy:
+      src: /usr/local/bin/ansible/roles/snmp_files/snmp-linux
+      dest: /root/.snmp/snmp.conf
+      owner: root
+      group: root
+      mode: 0644
+#    notify:
+#    - root_snmp
+
+  - name: "Ensure snmpd is running" 
+    service:
+      name: snmpd
+      state: restarted
+      enabled: yes
+
+
+#  handlers:
+#
+#   - name: root_snmp  
+#      command: net-snmp-create-v3-user -ro -A snmpv3authPass -a SHA -X snmpv3encPass -x AES snmpv3user
+#
+#   - name: snmp_start
+#      service:
+#        name: snmpd
+#        state: started

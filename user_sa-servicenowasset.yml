@@ -1,0 +1,14 @@
+---
+- hosts: all
+
+  tasks:
+  - name: Create users for Snow 
+    user:
+      name: sa-servicenowasset
+      state: present
+      shell: /bin/bash
+      groups: wheel
+      update_password: always
+      password: $6$PzOv68ji$Fl1Ped.qQ1ghl1
+
+

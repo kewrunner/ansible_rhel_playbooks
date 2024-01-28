@@ -1,0 +1,16 @@
+---
+- hosts: all
+  tasks:
+    - name: Create admin user LINUXTEAM
+      user:
+        state: present
+        name: linuxteam
+        groups: wheel
+        password: $6$lr3cR5PI$WM6rQZDz7BLx/
+        append: yes
+        uid: 1550
+    - name: Ensure group ID is 1550
+      group:
+        name: linuxteam
+        state: present
+        gid: 1550

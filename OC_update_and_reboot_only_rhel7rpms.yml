@@ -1,0 +1,172 @@
+---
+- hosts: all
+
+  tasks:
+
+  - name: upgrade all packages
+    yum:
+      name: '*'
+      disablerepo: "*"
+      enablerepo: "rhel-7-server-rpms"
+      state: latest
+      skip_broken: yes
+
+- hosts: master1
+
+  tasks:
+
+  - name: reboot host master1
+    shell: sleep 10 && /sbin/shutdown -r now
+    async: 300
+    poll: 0
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: master2
+
+  tasks:
+
+  - name: reboot host master2
+    shell: sleep 10 && /sbin/shutdown -r now
+    async: 300
+    poll: 0
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: master3
+
+  tasks:
+
+  - name: reboot host master3
+    shell: sleep 10 && /sbin/shutdown -r now
+    async: 300
+    poll: 0
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: infra1
+
+  tasks:
+
+  - name: reboot host infra1
+    shell: sleep 10 && /sbin/shutdown -r now
+    async: 300
+    poll: 0
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+   
+- hosts: infra2
+
+  tasks:
+
+  - name: reboot host infra2
+    shell: sleep 10 && /sbin/shutdown -r now
+    async: 300
+    poll: 0
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: infra3
+
+  tasks:
+
+  - name: reboot host infra3
+    shell: sleep 10 && /sbin/shutdown -r now
+    async: 300
+    poll: 0
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: cns01
+
+  tasks:
+
+  - name: reboot host cns01
+    shell: sleep 10 && /sbin/shutdown -r now
+    async: 300
+    poll: 0
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: cns02 
+
+  tasks:
+
+  - name: reboot host cns02
+    shell: sleep 10 && /sbin/shutdown -r now
+    async: 300
+    poll: 0
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: cns03
+
+  tasks:
+
+  - name: reboot host cns03
+    shell: sleep 10 && /sbin/shutdown -r now
+    async: 300
+    poll: 0
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: all_app
+
+  tasks:
+
+  - name: check uptime
+    shell: uptime

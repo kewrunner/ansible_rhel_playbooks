@@ -1,0 +1,176 @@
+---
+- hosts: all 
+
+  tasks:
+  - name: Set password for root
+    user:
+      name: root
+      update_password: always
+      password: $6$XJ4AL.mB$baTrj9z.hfVRhmq9eOfEfsPUO7nwnznShTjaXJFw.
+
+  - name: "Copy login.defs file"
+    copy:
+      src: /usr/local/bin/ansible/roles/soxpasswd_files/login.defs
+      dest: /etc/login.defs
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: "Copy pam_pwquality.so file"
+    copy:
+      src: /usr/local/bin/ansible/roles/soxpasswd_files/pam_pwquality.so
+      dest: /lib64/security/pam_pwquality.so
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: "Copy system-auth-ac file for RHEL6"
+    copy:
+      src: /usr/local/bin/ansible/roles/soxpasswd_files/system-auth-ac  
+      dest: /etc/pam.d/system-auth-ac 
+      owner: root
+      group: root
+      mode: 0644
+    when:
+      - ansible_distribution_major_version == "6"
+
+  - name: "Copy sysctl.conf file for RHEL6"
+    copy:
+      src: /usr/local/bin/ansible/roles/soxpasswd_files/rhel6_sysctl.conf
+      dest: /etc/sysctl.conf
+      owner: root
+      group: root
+      mode: 0644
+    when:
+      - ansible_distribution_major_version == "6"
+    notify:
+    - sysctl
+
+  - name: "Copy system-auth-ac file for RHEL7"
+    copy:
+      src: /usr/local/bin/ansible/roles/soxpasswd_files/system-auth-ac_rhel7  
+      dest: /etc/pam.d/system-auth-ac 
+      owner: root
+      group: root
+      mode: 0644
+    when:
+      - ansible_distribution_major_version == "7"
+
+  - name: "Copy sysctl.conf file for RHEL7"
+    copy:
+      src: /usr/local/bin/ansible/roles/soxpasswd_files/rhel7_sysctl.conf     
+      dest: /etc/sysctl.conf
+      owner: root
+      group: root
+      mode: 0644
+    when:
+      - ansible_distribution_major_version == "7"
+    notify:
+    - systemd-sysctl.service
+
+  - name: "Removing the /root/.rhosts file"
+    file:
+      path: /root/.rhosts
+      state: absent
+
+  handlers:
+  - name: sysctl  
+    command: /sbin/sysctl -p
+
+
+  - name: "Copy ntp.conf file for RHEL6"
+    copy:
+      src: /usr/local/bin/ansible/roles/timeserver_files/ntp.conf
+      dest: /etc/ntp.conf
+      owner: root
+      group: root
+      mode: 0644
+    when:
+      - ansible_distribution_major_version == "6"
+    notify:
+    - ntp
+
+  - name: "Copy step-tickers file for RHEL6"
+    copy:
+      src: /usr/local/bin/ansible/roles/timeserver_files/step-tickers 
+      dest: /etc/ntp/step-tickers
+      owner: root
+      group: root
+      mode: 0644
+    when:
+      - ansible_distribution_major_version == "6"
+
+  - name: "Copy chrony.conf file for RHEL7"
+    copy:
+      src: /usr/local/bin/ansible/roles/timeserver_files/chrony.conf
+      dest: /etc/chrony.conf
+      owner: root
+      group: root
+      mode: 0644
+    when:
+      - ansible_distribution_major_version == "7"
+    notify:
+    - chrony
+ 
+  handlers:
+  - name: ntp
+    service:
+      name: ntpd
+      state: restarted
+
+  - name: chrony
+    service: 
+      name: chronyd
+      state: restarted
+
+
+  - name: install the latest version of net-snmp
+    yum:
+      name: net-snmp
+      state: latest
+
+  - name: install the latest version of net-snmp-utils 
+    yum:
+      name: net-snmp-utils
+      state: latest
+
+  - name: "Ensure directory /root/.snmp"
+    file:
+      path: /root/.snmp  
+      state: directory
+
+  - name: "Copy snmpdv2v3-linux file to /etc/snmp"
+    copy:
+      src: /usr/local/bin/ansible/roles/snmp_files/snmpdv2v3-linux
+      dest: /etc/snmp/snmpd.conf 
+      owner: root
+      group: root
+      mode: 0644
+    notify:
+    - snmp_restart
+
+  - name: "Copy snmp.conf file to /root/.snmp"
+    copy:
+      src: /usr/local/bin/ansible/roles/snmp_files/snmp-linux
+      dest: /root/.snmp/snmp.conf
+      owner: root
+      group: root
+      mode: 0644
+    notify:
+    - root_snmp
+
+  - name: "Ensure snmpd is runnung" 
+    service:
+      name: snmpd
+      state: started
+
+
+  handlers:
+    - name: root_snmp  
+      command: net-snmp-create-v3-user -ro -A snmpv3authPass -a SHA -X snmpv3encPass -x AES snmpv3user
+
+    - name: snmp_restart
+      service:
+        name: snmpd
+        state: restarted
+

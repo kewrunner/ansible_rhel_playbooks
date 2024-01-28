@@ -1,0 +1,12 @@
+---
+- hosts: all
+
+  tasks:
+  - name: upgrade all packages
+    yum:
+      name: '*'
+      disablerepo: "*"
+      enablerepo: "rhel-*"
+      state: latest
+      skip_broken: no
+      exclude: jenkins*

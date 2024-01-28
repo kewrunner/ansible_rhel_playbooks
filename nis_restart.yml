@@ -1,0 +1,15 @@
+---
+- hosts: all
+  
+  tasks:
+  - name: "Restart NIS services"
+    systemd:
+      state: restarted
+      name: ypbind
+    ignore_errors: yes
+
+  - name: "Stop sssd services, if running"
+    systemd:
+      state: stopped
+      name: sssd
+    ignore_errors: yes

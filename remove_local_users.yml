@@ -1,0 +1,30 @@
+---
+- hosts: all
+  vars:
+    user_names:
+      - 'charles'
+      - 'danny'
+      - 'frank'
+      - 'jeff'
+      - 'derrick'
+      - 'randolph'
+      - 'victor'
+
+  tasks:
+
+  - name: Stop service ypbind, if running
+    service:
+      name: ypbind
+      state: stopped
+
+  - name: Remove previously identified local accounts.
+    user:
+      name: '{{ item }}'
+      state: absent
+      remove: yes
+    with_items: "{{ user_names }}"
+
+  - name: Start service ypbind, if not running
+    service:
+      name: ypbind
+      state: started

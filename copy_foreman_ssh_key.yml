@@ -1,0 +1,15 @@
+---
+- hosts: all
+
+  tasks:
+
+  - name: Touch /tmp/authorized_keys
+    file:
+      path: /tmp/authorized_keys
+      state: touch
+
+  - name: Copying Foreman's SSH Key to Clients
+    lineinfile:
+      path: /tmp/authorized_keys
+      state: present
+      line: 'ssh-rsa AAAAB3NARGAOEBJMGMERKS:lrijoilekvI++J/gOWsxQpOaat3BD6yLzDTHUVoJJ53h/sp7v+Ix foreman-proxy@hsatsrv01.miami.atomic.com'

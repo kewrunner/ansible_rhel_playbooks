@@ -1,0 +1,8 @@
+---
+- hosts: all
+  vars:
+  tasks:
+    - name: new variable with current date time    
+      set_fact: temp="{{ lookup('pipe', 'date -d \"1 day ago\" +\"%Y%m%d\"') }}"
+    - name: print variable
+      debug: msg="Current date and time is {{temp}}"

@@ -1,0 +1,63 @@
+---
+- hosts: all
+
+  tasks:
+
+  - name: "Copy ntp.conf file for RHEL6"
+    copy:
+      src: /usr/local/bin/ansible/roles/timeserver_files/ntp.conf
+      dest: /etc/ntp.conf
+      owner: root
+      group: root
+      mode: 0644
+    when:
+      - ansible_distribution_major_version == "6"
+    notify:
+    - ntp
+
+  - name: "Copy step-tickers file for RHEL6"
+    copy:
+      src: /usr/local/bin/ansible/roles/timeserver_files/step-tickers 
+      dest: /etc/ntp/step-tickers
+      owner: root
+      group: root
+      mode: 0644
+    when:
+      - ansible_distribution_major_version == "6"
+
+  - name: "Copy chrony.conf file for RHEL7"
+    copy:
+      src: /usr/local/bin/ansible/roles/timeserver_files/chrony.conf
+      dest: /etc/chrony.conf
+      owner: root
+      group: root
+      mode: 0644
+    when:
+      - ansible_distribution_major_version == "7"
+    notify:
+    - chrony
+ 
+  - name: "Copy chrony.conf file for RHEL8"
+    copy:
+      src: /usr/local/bin/ansible/roles/timeserver_files/chrony.conf
+      dest: /etc/chrony.conf
+      owner: root
+      group: root
+      mode: 0644
+    when:
+      - ansible_distribution_major_version == "8"
+    notify:
+    - chrony
+ 
+  handlers:
+    - name: ntp
+      service:
+        name: ntpd
+        state: restarted
+
+    - name: chrony
+      service: 
+        name: chronyd
+        state: restarted
+
+

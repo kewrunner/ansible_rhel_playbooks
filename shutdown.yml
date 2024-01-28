@@ -1,0 +1,7 @@
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+  - name: Shutdown hosts
+    shell: /sbin/shutdown -h now
+   

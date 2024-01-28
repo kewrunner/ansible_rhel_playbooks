@@ -1,0 +1,91 @@
+---
+- hosts: [all]
+  
+  tasks:
+ 
+  - name: "Install the latest version of ypbind"
+    yum:
+      name: ypbind
+      state: latest
+
+  - name: "Add NIS server records to host file"
+    blockinfile:
+      path: /etc/hosts
+      block: |
+        # NIS Servers 
+        167.118.162.157	smypnis01lv.sungard.atomicharvest.com  smypnis01lv
+        192.168.170.38	smypnis02lv.sungard.atomicharvest.com  smypnis02lv
+        167.118.163.77	smypnis03lv.sungard.atomicharvest.com  smypnis03lv
+        192.168.170.32	smypnis04lv.sungard.atomicharvest.com  smypnis04lv 
+      insertafter: EOF
+      state: present
+
+  - name: "Add NIS Domain name and ypservers to /etc/yp.conf"
+    blockinfile:
+      path: /etc/yp.conf
+      block: |
+        domain nclweb 
+        ypserver smypnis01lv.sungard.atomicharvest.com
+        ypserver smypnis02lv.sungard.atomicharvest.com
+        ypserver smypnis03lv.sungard.atomicharvest.com
+        ypserver smypnis04lv.sungard.atomicharvest.com
+      insertafter: EOF
+      state: present
+
+  - name: "Copy /etc/sysconfig/network"
+    copy:
+      src: /usr/local/bin/ansible/puppet_modules/nisclient/files/network
+      dest: /etc/sysconfig
+
+#  - name: "vi /etc/nsswitch.conf and change files nis"
+#    replace:
+#      path: /etc/nsswitch.conf
+#      regexp: 'passwd: files sss'
+#      replace: 'passwd: files nis'
+#      regexp: 'group: files sss'
+#      replace: 'group: files nis'
+#      regexp: 'shadow: files sss'
+#      replace: 'shadow: files nis'
+
+  - name: "Run yp-domainname command to set domain name nclweb"
+    shell: "/bin/domainname nclweb"
+
+  - name: "Append +:::::: on /etc/passwd"
+    lineinfile:
+      path: /etc/passwd
+      line: '+::::::'
+      insertafter: EOF
+      state: present
+
+  - name: "Append +::: on /etc/group"
+    lineinfile:
+      path: /etc/group
+      line: '+:::'
+      insertafter: EOF
+      state: present
+
+  - name: "Copy nsswitch.conf to /etc/"
+    copy:
+      src: /usr/local/bin/ansible/puppet_modules/nisclient/files/nsswitch.conf
+      dest: /etc/
+
+  - name: "Copy system-auth-ac to /etc/pam.d/"
+    copy:
+      src: /usr/local/bin/ansible/puppet_modules/nisclient/files/system-auth-ac
+      dest: /etc/pam.d/
+
+  - name: "Copy password-auth-ac to /etc/pam.d/"
+    copy:
+      src: /usr/local/bin/ansible/puppet_modules/nisclient/files/password-auth-ac
+      dest: /etc/pam.d/
+
+  - name: "Copy sudoers file"
+    copy:
+      src: /usr/local/bin/ansible/puppet_modules/sudo/files/sudoers
+      dest: /etc/
+
+  - name: "Restart ypbind service"
+    service:
+      name: ypbind
+      state: restarted
+      enabled: yes

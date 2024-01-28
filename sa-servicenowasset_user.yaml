@@ -1,0 +1,11 @@
+---
+- hosts: all
+
+  tasks:
+  - name: Create user for sa-servicenowasset 
+    user:
+      name: sa-servicenowasset
+      update_password: always
+      password: $6$.1QZd3T0$E0vellARCC0CqEtE1
+
+

@@ -1,0 +1,106 @@
+---
+- name: Yum Update OS Sofware and Kernel on all nodes
+  hosts: nodes
+  order: reverse_sorted
+  # Order of revers_sorted will do blahocmaster* blahocinfr* blahocapp*
+  tasks:
+  - name: Run Excluder Commands
+    shell: atomic-openshift-docker-excluder exclude && atomic-openshift-excluder exclude
+
+  - name: Yum Repo Disable-Enable and Update
+    yum:
+      name: '*'
+      disablerepo: '*'
+      enablerepo: 'rhel-7-server-rpms'
+      state: latest
+      skip_broken: no
+
+- name: Pause one time for all nodes
+  hosts: localhost
+  tasks:
+  - name: pause one time
+    pause:
+      minutes: 1
+
+- name: Patch OCP Masters and Infra
+  hosts: nodes
+  order: reverse_sorted
+  # Order of revers_sorted will do blahocmaster* blahocinfr* blahocapp*
+  serial: 1
+  # Servial value of one means it will do one node at a time.
+  tasks:
+  - name: Drain and Cordon Node
+    delegate_to: "{{ groups['masters'][0] }}"
+    shell: oc adm drain {{ inventory_hostname }} --ignore-daemonsets --delete-local-data --timeout=60s
+    ignore_errors: true
+  - name: Check .img files
+    shell: |
+      file=$(ls -t1r /boot/*.img |tail -1)
+      stat=$(stat -c %Z $file|grep Modify: |awk -F: '{print $2 ":" $3}')
+      ts=$(date +%s)
+      kdump=$(echo $file |grep kdump)
+      grub=$(cat /boot/grub2/grub.cfg|grep '^menuentry'|tr '()' '='|awk -F= '{print $2}'|head -1)
+      version=$(rpm -q kernel |egrep "kernel\-[0-9]+.*\-[0-9]+\.[0-9]+"|sort -V |tail -1)
+      verresult=$(echo $version|grep $grub)
+      tdiff=$((($stat-$ts)/60))
+      ####if [ ! -z $kdump ] || [ -z $verresult ]; then
+      if [ -z $verresult ]; then
+         echo "reinstall"
+      elif [ $tdiff -gt 5 ]; then
+         echo "proceed"
+      else
+         echo "wait"
+      fi
+      echo "file --- $file kdump --- $kdump grub ---  $grub version --- $version verresult --- $verresult imgresult --- $imgresult " >/dev/stderr
+    register: imgresult
+ 
+  - name: Debug imgresult
+    debug:
+      msg: "{{ imgresult }}"
+
+  - name: reinstall kernel
+    shell: |
+      version=$(rpm -q kernel |egrep "kernel\-[0-9]+.*\-[0-9]+\.[0-9]+"|sort -V |tail -1)
+      yum -y reinstall $version
+      sleep 5
+      dracut=$(pgrep dracut)
+      if [ ! -z $dracut ]; then
+         sleep 5
+      fi
+    when: imgresult.stdout == "reinstall"
+
+  - name: pause
+    pause:
+      minutes: 1
+    when: imgresult.stdout == "wait"
+
+  - name: Shut Down Docker and OpenShift
+    service:
+       name: "{{ item }}"
+       state: stopped
+    loop:
+      - atomic-openshift-node
+      - docker
+
+  - name: Reboot Node
+    shell: nohup bash -c "sleep 10 && /sbin/shutdown -r now" &
+    ignore_errors: true
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+  - name: Run UnExcluder Commands
+    shell: atomic-openshift-docker-excluder unexclude && atomic-openshift-excluder unexclude
+
+  - name: UnCordon Node
+    delegate_to: "{{ groups['masters'][0] }}"
+    shell: oc adm uncordon {{ inventory_hostname }}
+    retries: 3
+    delay: 10
+    register: result
+    until: result.rc == 0

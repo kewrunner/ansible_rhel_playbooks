@@ -1,0 +1,9 @@
+---
+- hosts: all
+  tasks:
+  - name: Remove previously identified local accounts
+    user:
+      name: "{{ item }}"
+      state: absent
+    with_items: "{{ lookup('file', '/usr/local/bin/ansible/hosts/op_list').splitlines() }}"
+    

@@ -1,0 +1,10 @@
+---
+- hosts: all
+
+  tasks:
+  - name: Create admin user LINUXTEAM
+    user:
+      name: linuxteam
+      groups: wheel
+      update_password: always
+      password:$6$lr3cR5PI$WP52BNQM6rQZDz7BLx    

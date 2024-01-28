@@ -1,0 +1,44 @@
+---
+###Automatic reboot servers###
+- hosts: [Automatic]
+
+  tasks:
+
+  - name: upgrade all packages
+    yum:
+      name: '*'
+      state: latest
+      skip_broken: yes
+   
+  - name: reboot host
+    shell: sleep 10 && /sbin/shutdown -r now
+    async: 300
+    poll: 0
+      
+###No reboot servers###
+- hosts: [Manual]
+
+  tasks:
+
+  - name: upgrade all packages
+    yum:
+      name: '*'
+      state: latest
+      skip_broken: yes
+
+###wait for rebooted hosts to return###
+- hosts: [Automatic]
+
+  tasks:
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+
+
+

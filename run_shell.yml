@@ -1,0 +1,7 @@
+---
+- hosts: all
+
+  tasks:
+
+  - name: Unregister with Satellite
+    shell: subscription-manager unregister

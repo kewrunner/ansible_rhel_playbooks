@@ -1,0 +1,11 @@
+---
+- hosts: all
+
+  tasks:
+  - name: Set password for root
+    user:
+      name: root
+      update_password: always
+      password: o;difaoijdfoqijfo[iqjfoijeqpoiup9q34jkln34v;onqthpoiqG/
+
+# Sets the root password to changeme

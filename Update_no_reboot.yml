@@ -1,0 +1,12 @@
+---
+- hosts: all
+  gather_facts: no
+
+  tasks:
+  - name: Upgrade all RHEL packages and Datadog
+    yum:
+      name: '*'
+      disablerepo: "*"
+      enablerepo: "rhel-*"
+      state: latest
+      skip_broken: no

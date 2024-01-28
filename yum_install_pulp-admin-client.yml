@@ -1,0 +1,10 @@
+---
+- name: Install pulp-admin-client
+  hosts: all
+  gather_facts: true
+
+  tasks:
+  - name: Install pulp-admin-client
+    yum:
+      name: pulp-admin-client
+      state: latest

@@ -1,0 +1,12 @@
+---
+- hosts: all
+
+  tasks:
+  - name: Create users for sa-secscan
+    user:
+      name: sa-secscan
+      update_password: always
+      password: $6$k8B1w/Sp$roF3dzrucMuXEGYQl1
+
+
+# Passwd is ncl7665    

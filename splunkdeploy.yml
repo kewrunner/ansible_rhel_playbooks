@@ -1,0 +1,27 @@
+---
+- hosts: [all]
+  
+  tasks:
+  - name: "Stop splunk"
+    command: "/opt/splunkforwarder/bin/splunk stop"
+    ignore_errors: yes
+  - name: "Untar splunk tar file"
+    unarchive:
+      src: /installs/splunk/splunkforwarder-7.3.1-Linux-x86_64.tgz
+      dest: /opt/
+
+  - name: "Copy Configuration folder (ocs_all_deploymentclient) to path"
+    copy:
+      src: /installs/splunk/ocs_all_deploymentclient
+      dest: /opt/splunkforwarder/etc/apps/
+      owner: root
+      group: root
+
+  - name: "Set Splunk to restart on boot"
+    command: "/opt/splunkforwarder/bin/splunk enable boot-start --accept-license --answer-yes --auto-ports --no-prompt -systemd-managed 0"
+    ignore_errors: yes
+
+  - name: "Start Splunk"
+    service:
+      name: splunk
+      state: started

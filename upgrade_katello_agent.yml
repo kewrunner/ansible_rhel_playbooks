@@ -1,0 +1,15 @@
+---
+- hosts: all
+
+  tasks:
+  - name: Upgrade Katello-agent packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - katello-agent
+      - katello-host-tools
+      - katello-host-tools-fact-plugin
+      - pulp-rpm-handlers
+      - qpid-proton-c

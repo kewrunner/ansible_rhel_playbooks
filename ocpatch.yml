@@ -1,0 +1,41 @@
+---
+- hosts: all
+  tasks:
+  - name: upgrade all packages under rhel*
+    yum:
+      name: '*'
+      disablerepo: '*'
+      enablerepo: rhel*
+      state: latest
+      skip_broken: yes
+      exclude: jenkin*
+- hosts: master1
+  tasks:
+  - name: rebooting master1
+    reboot:
+  - name: wait for rebooted hosts to be online
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+  - name: check uptime
+    shell: uptime
+- hosts: master2
+  tasks:
+  - name: rebooting master2
+    reboot:
+  - name: wait for rebooted hosts to be online
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+  - name: check uptime
+    shell: uptime
+- hosts: master3
+  tasks:
+  - name: rebooting master3
+    reboot:
+  - name: wait for rebooted hosts to be online
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+  - name: check uptime
+    shell: uptime

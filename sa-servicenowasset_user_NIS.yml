@@ -1,0 +1,33 @@
+---
+- hosts: all
+
+  tasks:
+  - name: Stopping ypbind
+    shell: service ypbind stop > /dev/null 2>&1
+    ignore_errors: yes
+  - name: Stopping sssd
+    shell: service sssd stop > /dev/null 2>&1
+    ignore_errors: yes
+  - name: Create user for sa-servicenowasset 
+    user:
+      name: sa-servicenowasset
+      password: $6$.1QZd8qT3vellARCC0CqEtE1
+      update_password: always
+  - name: "Copy sudoers file to sudoers.d"
+    copy:
+      src: files/sa-servicenowasset
+      dest: /etc/sudoers.d/
+  - name: Create home directory for sa-servicenowasset
+    file:
+      path: /home/sa-servicenowasset
+      state: directory
+      owner: sa-servicenowasset
+      group: sa-servicenowasset
+      mode: 0700
+      recurse: yes
+  - name: Starting ypbind
+    shell: service ypbind start > /dev/null 2>&1
+    ignore_errors: yes
+#  - name: Starting sssd
+#    shell: service sssd start > /dev/null 2>&1
+#    ignore_errors: yes

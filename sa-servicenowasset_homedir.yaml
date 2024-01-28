@@ -1,0 +1,13 @@
+---
+- hosts: all
+
+  tasks:
+  - name: Create home directory for sa-servicenowasset
+    file:
+      path: /home/sa-servicenowasset
+      state: directory
+      owner: sa-servicenowasset
+      group: sa-servicenowasset
+      mode: 0700
+      recurse: yes
+

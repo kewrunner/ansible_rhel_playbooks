@@ -1,0 +1,11 @@
+---
+- hosts: all
+
+  tasks:
+  - name: Update Datagod
+    yum:
+      name: '*'
+      disablerepo: "*"
+      enablerepo: "datadog"
+      state: latest
+      skip_broken: no

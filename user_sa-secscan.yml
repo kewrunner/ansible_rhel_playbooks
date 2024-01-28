@@ -1,0 +1,53 @@
+---
+- hosts: all
+
+  tasks:
+#  - name: Stopping ypbind
+#    shell: service ypbind stop > /dev/null 2>&1
+#    ignore_errors: yes
+#  - name: Stopping sssd
+#    shell: service sssd stop > /dev/null 2>&1
+#    ignore_errors: yes
+#
+  - name: Create users for sa-secscan
+    user:
+      name: sa-secscan
+      update_password: always
+      password: $1$65AXan4kbR.Mg.
+
+  - name: "Copy sudoers file to sudoers.d"
+    copy:
+      src: files/sa-secscan
+      dest: /etc/sudoers.d/
+
+  - name: Make sure the user is in the sudoers configuration
+    lineinfile:
+      path: /etc/sudoers
+      state: present
+      regexp: '#includedir /etc/sudoers.d'
+      line: '#includedir /etc/sudoers.d'
+      validate: '/usr/sbin/visudo -cf %s'
+
+#  - name: "Copy ssh_banner"
+#    copy:
+#      src: files/ssh_banner
+#      dest: /etc/ssh/
+#  - name: Restart service httpd, in all cases
+#    service:
+#      name: sshd
+#      state: restarted
+#
+  - name: Create home directory for sa-secscan
+    file:
+      path: /home/sa-secscan
+      state: directory
+      owner: sa-secscan
+      group: sa-secscan
+      mode: 0700
+      recurse: yes
+#  - name: Starting ypbind
+#    shell: service ypbind start > /dev/null 2>&1
+#    ignore_errors: yes
+#  - name: Starting sssd
+#    shell: service sssd start > /dev/null 2>&1
+#    ignore_errors: yes

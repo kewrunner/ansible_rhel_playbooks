@@ -1,0 +1,8 @@
+---
+- hosts: all
+
+  tasks:
+  - name: RM Firefox
+    yum:
+      name: firefox
+      state: absent

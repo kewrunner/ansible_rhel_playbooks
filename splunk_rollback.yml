@@ -1,0 +1,134 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    splunk_6_was_present: false
+    splunk_7_present: false
+  tasks:
+    - name: Check splunk for old version 6
+      command: rpm -qa --last splunkforwarder
+      register: splunk_6_command
+
+    - name: Debug output
+      debug:
+        msg: "{{ splunk_6_command.stdout }}"
+
+    - name: Is 6 previously installed
+      set_fact:
+        splunk_6_was_present: true
+      when: splunk_6_command.stdout.find('splunkforwarder-6.3.1') != -1
+
+    - name: Debug output
+      debug:
+        msg: "{{ splunk_6_was_present }}"
+
+    - name: run a command
+      shell: echo "we found 6"
+      when: splunk_6_was_present
+
+# test for 7
+    - name: Check splunk for current version 7
+      command: /opt/splunkforwarder/bin/splunk -version
+      register: splunk_7_command
+      #ignore_errors: yes
+
+    - name: Debug output
+      debug:
+        msg: "{{ splunk_7_command.stdout }}"
+      #ignore_errors: yes
+
+    - name: Is 7 currently installed
+      set_fact:
+        splunk_7_present: true
+      when: splunk_7_command.stdout.find('Splunk Universal Forwarder 7.3.1') != -1
+      #ignore_errors: yes
+
+    - name: Debug output
+      debug:
+        msg: "{{ splunk_7_present }}"
+      #ignore_errors: yes
+
+    - name: run a command
+      shell: echo "we found 7"
+      when: splunk_7_present
+      #ignore_errors: yes
+
+## rollback
+    - name: test if we should actually rollback
+      shell: echo "yes we should rollback"
+      when:
+        - splunk_6_was_present
+        - splunk_7_present
+
+    - name: Stop Splunk service
+      command: /opt/splunkforwarder/bin/splunk stop
+      when:
+        - splunk_6_was_present
+        - splunk_7_present
+
+    - name: Disable Splunk service from boot
+      command: /opt/splunkforwarder/bin/splunk disable boot-start --accept-license --answer-yes --auto-ports --no-prompt -systemd-managed 0
+      when:
+        - splunk_6_was_present
+        - splunk_7_present
+
+    - name: Delete the splunkforwarder directory
+      file:
+        path: /opt/splunkforwarder/
+        state: absent
+      when:
+        - splunk_6_was_present
+        - splunk_7_present
+
+    - name: Removing Splunk Agent
+      command: rpm -e splunkforwarder
+      when:
+        - splunk_6_was_present
+        - splunk_7_present
+
+    - name: Copy Splunk 6.3.1 to local /tmp
+      copy:
+        src: /installs/splunk/splunkforwarder-6.3.1-f3e41e4b37b2-linux-2.6-x86_64.rpm
+        dest: /tmp/
+        owner: root
+        group: root
+      when:
+        - splunk_6_was_present
+        - splunk_7_present
+
+    - name: Installing Splunk Agent 6.3.1
+      command: rpm -i /tmp/splunkforwarder-6.3.1-f3e41e4b37b2-linux-2.6-x86_64.rpm
+      when:
+        - splunk_6_was_present
+        - splunk_7_present
+
+    - name: Starting Splunk service & Accepting License
+      command: /opt/splunkforwarder/bin/splunk start --accept-license
+      when:
+        - splunk_6_was_present
+        - splunk_7_present
+
+    - name: Setting service on boot-start
+      command: /opt/splunkforwarder/bin/splunk enable boot-start
+      when:
+        - splunk_6_was_present
+        - splunk_7_present
+
+    - name: Connecting to Splunk Server
+      command: /opt/splunkforwarder/bin/splunk add forward-server 167.118.127.58:9997 -auth admin:changeme
+      when:
+        - splunk_6_was_present
+        - splunk_7_present
+
+    - name: Set Deploy-Poll
+      command: /opt/splunkforwarder/bin/splunk set deploy-poll 167.118.127.58:8089
+      when:
+        - splunk_6_was_present
+        - splunk_7_present
+
+    - name: Restart Splunk Service
+      command: service splunk restart
+      when:
+        - splunk_6_was_present
+        - splunk_7_present
+

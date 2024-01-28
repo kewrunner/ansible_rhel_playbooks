@@ -1,0 +1,62 @@
+---
+- hosts: all
+
+  tasks:
+  - name: Stopping ypbind
+    shell: service ypbind stop > /dev/null 2>&1
+    ignore_errors: yes
+  - name: Stopping sssd
+    shell: service sssd stop > /dev/null 2>&1
+    ignore_errors: yes
+
+  - name: Ensure group "dba" exists with correct gid
+    group:
+      name: dba
+      state: present
+      gid: 203
+
+
+  - name: Ensure group "oinstall" exists with correct gid
+    group:
+      name: oinstall
+      state: present
+      gid: 204
+
+  - name: Create users for oracle
+    user:
+      name: oracle
+      uid: 202
+      group: 203
+      groups: oinstall
+      shell: /bin/ksh
+      update_password: always
+      password: $6$ugrAW6Nq$k0ALjokV1cJTAZ46zQS31
+
+  - name: "Copy sudoers file to sudoers.d"
+    copy:
+      src: files/oracle 
+      dest: /etc/sudoers.d/
+
+  - name: Make sure the user is in the sudoers configuration
+    lineinfile:
+      path: /etc/sudoers
+      state: present
+      regexp: '#includedir /etc/sudoers.d'
+      line: '#includedir /etc/sudoers.d'
+      validate: '/usr/sbin/visudo -cf %s'
+#
+  - name: Create home directory for oracle
+    file:
+      path: /home/oracle
+      state: directory
+      owner: oracle
+      group: dba
+      mode: 0700
+      recurse: yes
+
+  - name: Starting ypbind
+    shell: service ypbind start > /dev/null 2>&1
+    ignore_errors: yes
+  - name: Starting sssd
+    shell: service sssd start > /dev/null 2>&1
+    ignore_errors: yes

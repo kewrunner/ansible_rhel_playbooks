@@ -1,0 +1,16 @@
+---
+  - name: cve check
+    hosts: all
+    tasks:
+      - yum:
+          list=installed
+        register: yum_packages
+    
+      - debug:
+          var: yum_packages
+
+      - debug: var=item
+        with_items: "{{ yum_packages|json_query(jsonquery) }}"
+        vars:
+          jsonquery: "results[?name=='openssh'].version"
+          msg: "{{ inventory_hostname }} has OpenSSH version {{ jsonquery }}"

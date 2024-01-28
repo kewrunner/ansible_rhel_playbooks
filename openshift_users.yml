@@ -1,0 +1,11 @@
+---
+- hosts: all
+
+  tasks:
+
+  - name: Create Users for OpenShift
+    user:
+      name: openshift
+      password: $6$7yFTCip0$fTcZOW9Jm5HFDUsI1IbTHEkJSZy.
+
+

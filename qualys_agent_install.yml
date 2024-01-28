@@ -1,0 +1,18 @@
+---
+- name: Qualys Agent Install. 
+  hosts: all
+
+  tasks:
+
+  - name: Copy RPM to Server.
+    copy:
+      src: /tmp/QAI/qualys-cloud-agent.x86_64.rpm
+      dest: /tmp/qualys-cloud-agent.x86_64.rpm
+
+  - name: Installing Package.
+    yum:
+      name: /tmp/qualys-cloud-agent.x86_64.rpm
+      state: present
+  
+  - name: Activating Client
+    command: /usr/local/qualys/cloud-agent/bin/qualys-cloud-agent.sh ActivationId=9749d9a6-66c4-4693-a8c7-eb6e42da61d8 CustomerId=d7feb11f-87e9-58da-8158-3ec6e21dd6b9

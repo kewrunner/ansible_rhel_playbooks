@@ -1,0 +1,40 @@
+---
+- name: Yum Update OS Sofware and Kernel on all nodes
+  hosts: nodes
+  order: reverse_sorted
+  # Order of revers_sorted will do blahocmaster* blahocinfr* blahocapp*
+  tasks:
+  - name: Run Excluder Commands
+    shell: atomic-openshift-docker-excluder exclude && atomic-openshift-excluder exclude
+
+- name: Patch OCP Masters and Infra
+  hosts: nodes
+  order: reverse_sorted
+  # Order of revers_sorted will do blahocmaster* blahocinfr* blahocapp*
+  serial: 1
+  # Servial value of one means it will do one node at a time.
+  tasks:
+  - name: Drain and Cordon Node
+    delegate_to: "{{ groups['masters'][0] }}"
+    shell: oc adm drain {{ inventory_hostname }} --ignore-daemonsets --delete-local-data --timeout=60s
+    ignore_errors: true
+
+  - name: Reboot Node
+    shell: nohup bash -c "sleep 10 && /sbin/shutdown -r now" &
+    ignore_errors: true
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+  - name: UnCordon Node
+    delegate_to: "{{ groups['masters'][0] }}"
+    shell: oc adm uncordon {{ inventory_hostname }}
+    retries: 3
+    delay: 10
+    register: result
+    until: result.rc == 0

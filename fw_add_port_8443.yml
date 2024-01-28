@@ -1,0 +1,7 @@
+---
+- hosts: all
+
+  tasks:
+
+  - name: Adding Firewall Port 8443
+    shell: firewall-cmd --permanent --add-port=8443/tcp

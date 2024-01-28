@@ -1,0 +1,117 @@
+---
+- hosts: all
+
+  tasks:
+
+  - name: Upgrade all packages under rhel*
+    yum:
+      name: '*'
+      disablerepo: '*'
+      enablerepo: rhel*
+      state: latest
+      skip_broken: yes
+
+- hosts: master1
+
+  tasks:
+
+  - name: Rebooting Master1
+    reboot:
+
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: master2
+
+  tasks:
+  
+  - name: Rebooting Master2
+    reboot:
+  
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: master3
+
+  tasks:
+  
+  - name: Rebooting Master3
+    reboot:
+  
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: infra1
+
+  tasks:
+  
+  - name: Rebooting Infra1
+    reboot:
+  
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: infra2
+
+  tasks:
+  
+  - name: Rebooting Infra2
+    reboot:
+  
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: infra3
+
+  tasks:
+  
+  - name: Rebooting Infra3
+    reboot:
+  
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime
+
+- hosts: all_app
+
+  tasks:
+  
+  - name: Rebooting Apps nodes and tower
+    reboot:
+  
+  - name: wait for rebooted hosts to return
+    wait_for_connection:
+      delay: 15
+      timeout: 300
+
+  - name: check uptime
+    shell: uptime

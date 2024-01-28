@@ -1,0 +1,13 @@
+---
+- hosts: [all]
+  
+  tasks:
+ 
+  - name: Check if Splunk in installed
+    service_facts:
+    register: service_state
+
+
+  - name: Debug
+    debug:
+      var: service_state
