@@ -1,7 +1,7 @@
 ---
 - hosts: all
   vars_files:
-    - termination_march_2020_ea.yml
+    - term.yml
   
   tasks:
 
