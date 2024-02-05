@@ -1,5 +1,5 @@
 - hosts: all
   vars:
-     contents: "{{ lookup('file', '/usr/local/bin/ansible/hosts/termination_march_2020.txt') }}"
+     contents: "{{ lookup('file', '/usr/local/bin/ansible/hosts/term.txt') }}"
   tasks:
      - debug: msg="the value of foo.txt is {{ contents }}"
