@@ -1,1 +1,1 @@
-cat /etc/hosts |grep hdq|grep -v ^#|grep -v localhost|grep -v smy|grep -v oc|grep -v Balancer|grep -v DECOM|grep -v hdqdr2fs01lp|grep -v hdqpnbu01lp|grep -v r2fs7|grep -v Solaris|grep -v hdqpforem01lv|awk '{print $2}' > global_list
+cat /etc/hosts |grep hdq|grep -v ^#|grep -v localhost|grep -v smy|grep -v oc|grep -v Balancer|grep -v DECOM|grep -v srv1|grep -v srv2|grep -v r2fs7|grep -v Solaris|grep -v srv3|awk '{print $2}' > global_list
