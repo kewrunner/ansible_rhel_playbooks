@@ -2,7 +2,6 @@
 - hosts: [all]
   
   tasks:
-#  Modified on 1-17-2020 to comment out RHEL 6 lines
 #  - name: "Stopping and Disabling sssd"
 #    service:
 #      name: sssd
@@ -19,9 +18,9 @@
       path: /etc/hosts
       block: |
         # NIS Servers 
-        167.118.127.200 hdqpnis01lv # admin_patch RHEL7 
-        167.118.127.201 hdqpnis02lv # admin_patch RHEL7 
-        167.118.162.157 smypnis01lv     smypnis01lv.sungard.atomicharvest.com 
+        10.10.1.100 nissrv1 # admin_patch RHEL7 
+        10.10.1.101 nissrv2 # admin_patch RHEL7 
+        10.10.1.102 nissrv3 #    srv5.atomicharvest.com 
       insertafter: EOF
       state: present
 
